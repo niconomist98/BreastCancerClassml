@@ -13,7 +13,7 @@ def process_data(data: pd.DataFrame) -> pd.DataFrame:
                     .pipe(print_shape, msg=' Shape after remove exact duplicates')
                     .pipe(transform_output)
                     .pipe(sort_data, col = 'diagnosis')
-                    .pipe(drop_duplicates, drop_cols=['patient_nbr'])
+                    .pipe(drop_duplicates, drop_cols=['index'])
                     .pipe(print_shape, msg=' Shape after remove patient duplicates')
                     )
 
@@ -35,7 +35,7 @@ def sort_data(data: pd.DataFrame, col: str) -> pd.DataFrame:
 # remove duplicates from data based on a column
 def drop_exact_duplicates(data: pd.DataFrame) -> pd.DataFrame:
     """Drop duplicate rows from data."""
-    return data.drop_duplicates(keep=False)
+    return data.drop_duplicates(keep='first')
 
 # remove duplicates from data based on a column
 def drop_duplicates(data: pd.DataFrame,
@@ -46,9 +46,7 @@ def drop_duplicates(data: pd.DataFrame,
 
 def transform_output(data: pd.DataFrame) -> pd.DataFrame:
     """ Replace target column to 1 and 0 values"""
-
-    data["readmitted"].replace({'<30':1,
-                                '>30':0,
-                                'NO':0},
-                                inplace=True)
+    data = data[(data['diagnosis'] == 'B') | (data['diagnosis'] == 'M')]
+    data['diagnosis'].replace(data['diagnosis'])
     return data
+
