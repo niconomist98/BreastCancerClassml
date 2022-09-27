@@ -4,7 +4,8 @@ import numpy as np
 import logging
 from pathlib import Path
 from sklearn.preprocessing import StandardScaler
-
+from sklearn.model_selection import train_test_split # Import train_test_split function
+from sklearn.impute import KNNImputer
 
 def main(input_filepath, output_filepath):
     """ Runs data feature engineering scripts to turn interim data from (../interim) into
@@ -64,33 +65,32 @@ def main(input_filepath, output_filepath):
                     .pipe(drop_cols,drop_cols=cols_to_drop)
                     .pipe(drop_exact_duplicates)
                     .pipe(print_shape, msg=' Shape after dropping unnecesary cols')
-
                     )
 
     x_train = process_data.drop("diagnosis", axis=1)
+    tipificado = StandardScaler().fit(x_train)##Creating a scaler
+    x_train = pd.DataFrame(tipificado.transform(x_train),columns=x_train.columns)##scaling x_train
+
+
+    x_train=imputer_KNN(x_train)## imputing using KNN method
+
     y_train = process_data["diagnosis"]
 
     x_train.to_csv(f'{output_filepath}/x_train_model_input.csv', index=False)
     y_train.to_csv(f'{output_filepath}/y_train_model_input.csv', index=False)
     # End
+    print(f' number of nas {x_train.isna().sum().sum()}')
 
 
 
 
-from sklearn.model_selection import train_test_split # Import train_test_split function
-def imputer_na (data:pd.DataFrame)->pd.DataFrame:
-    tipificado = StandardScaler().fit(data[~data['diagnosis']])
-    data = tipificado.transform(data[~data['diagnosis']])
-    return data
 
-
-def imputer_na (data:pd.DataFrame)->pd.DataFrame:
+def imputer_KNN (X_train:pd.DataFrame)->pd.DataFrame:
 
     imputer = KNNImputer(n_neighbors=5)
-    X_train_imputed = pd.DataFrame(imputer.fit_transform(X_train), columns=X_train.columns)
-    X_train_imputed
+    X_train = pd.DataFrame(imputer.fit_transform(X_train), columns=X_train.columns)
 
-    return data
+    return X_train
 
 
 ##function to count nas
