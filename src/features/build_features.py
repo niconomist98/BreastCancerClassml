@@ -3,6 +3,7 @@ import pandas as pd
 import numpy as np
 import logging
 from pathlib import Path
+from sklearn.preprocessing import StandardScaler
 
 
 def main(input_filepath, output_filepath):
@@ -49,15 +50,21 @@ def main(input_filepath, output_filepath):
 
     process_data = (data
                     .pipe(print_shape, msg=' Shape original')
-                    .pipe(clean_blankspaces, cols_to_clean=features)
+                    .pipe(data_tostring)
+                    .pipe(clean_blankspaces, cols_to_clean=data.columns)
+                    .pipe(na_count)
                     .pipe(replace_missing_values, replace_values=['rxctf378968 7656463sdfg', '-88888765432345.0', '999765432456788.0', '?'])
+                    .pipe(na_count)
+                    .pipe(data_tofloat)
+                    .pipe(outlier_tona)
+                    .pipe(na_count)
+                    .pipe(to_category)
                     .pipe(drop_exact_duplicates)
                     .pipe(print_shape, msg=' Shape after droping duplicates')
                     .pipe(drop_cols,drop_cols=cols_to_drop)
                     .pipe(drop_exact_duplicates)
                     .pipe(print_shape, msg=' Shape after dropping unnecesary cols')
-                    .pipe(dropna)
-                    .pipe(print_shape, msg=' Shape after dropping nas')
+
                     )
 
     x_train = process_data.drop("diagnosis", axis=1)
@@ -68,12 +75,59 @@ def main(input_filepath, output_filepath):
     # End
 
 
+
+
+from sklearn.model_selection import train_test_split # Import train_test_split function
+def imputer_na (data:pd.DataFrame)->pd.DataFrame:
+    tipificado = StandardScaler().fit(data[~data['diagnosis']])
+    data = tipificado.transform(data[~data['diagnosis']])
+    return data
+
+
+def imputer_na (data:pd.DataFrame)->pd.DataFrame:
+
+    imputer = KNNImputer(n_neighbors=5)
+    X_train_imputed = pd.DataFrame(imputer.fit_transform(X_train), columns=X_train.columns)
+    X_train_imputed
+
+    return data
+
+
+##function to count nas
+def na_count(data:pd.DataFrame)->pd.DataFrame:
+    nulls=data.isnull().sum().sum()
+    print(f' la cantidad de nulos es : {nulls}')
+    return data
+
+
+##function to transform outliers in nas
+def outlier_tona(data:pd.DataFrame)->pd.DataFrame:
+
+    for i in data.columns:
+        Q1 = data[i].quantile(0.25)
+        Q3 = data[i].quantile(0.75)
+        IQR = Q3 - Q1
+        data[i] = np.where((data[i] < (Q1 - 1.5 * IQR)) | (data[i] > (Q3 + 1.5 * IQR)), np.nan, data[i])
+
+    return data
+##function to transform target to category
+def to_category(data:pd.DataFrame)->pd.DataFrame:
+    data['diagnosis'].astype('category')
+    return data
+
+
 # function to print shape of the dataframe
 def print_shape(data: pd.DataFrame, msg: str = 'Shape =') -> pd.DataFrame:
     """Print shape of dataframe."""
     print(f'{data.shape}{msg}')
     return data
-
+def data_tofloat(data:pd.DataFrame)->pd.DataFrame:
+    """Change dataset columns dtype"""
+    data=data.astype('float')
+    return data
+def data_tostring(data:pd.DataFrame)->pd.DataFrame:
+    data = data.astype('string')
+    return data
 
 # remove duplicates from data based on a column
 def drop_duplicates(data: pd.DataFrame,
@@ -110,10 +164,10 @@ def filter_cols_values(data: pd.DataFrame,
 
 # function to replace ? values with np.nan
 def replace_missing_values(data: pd.DataFrame,
-                           replace_values: str) -> pd.DataFrame:
+                           replace_values: list) -> pd.DataFrame:
     """Replace missing values in data with np.nan"""
-    return data.replace(replace_values, np.nan)
-
+    data=data.replace(replace_values, np.nan)
+    return data
 
 # function to fillna with a string in a column
 def fill_na_with_string(data: pd.DataFrame,
