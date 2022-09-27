@@ -13,7 +13,7 @@ def main(input_filepath, output_filepath):
     logger = logging.getLogger(__name__)
     logger.info('making interim data set from raw data')
 
-    logger.info('reading data')
+    logger.info('reading dataset')
     data_raw = pd.read_csv(f"{input_filepath}/BreastCancerDS.csv",index_col=0)
 
     logger.info('pre-processing data')
