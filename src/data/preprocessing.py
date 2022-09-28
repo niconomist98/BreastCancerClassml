@@ -12,8 +12,9 @@ def process_data(data: pd.DataFrame) -> pd.DataFrame:
                     .pipe(drop_exact_duplicates)#
                     .pipe(print_shape, msg=' Shape after remove exact cell examples')
                     .pipe(drop_duplicates, drop_cols=['index'])
-                    .pipe(print_shape,
-                          msg=' Shape after remove index duplicates')#
+                    .pipe(print_shape  ,
+                          msg=' Shape after remove index duplicates')
+                    .pipe(clean_misslabeled)
                     .pipe(transform_output)
                     .pipe(drop_exact_duplicates)
                     .pipe(sort_data, col = 'diagnosis')
@@ -50,8 +51,10 @@ def drop_duplicates(data: pd.DataFrame,
 
 def transform_output(data: pd.DataFrame) -> pd.DataFrame:
     """ Replace target column to 1 and 0 values"""
-    data = data[(data['diagnosis'] == 'B') | (data['diagnosis'] == 'M')]
     label_encoding = preprocessing.LabelEncoder()
     data['diagnosis'] = label_encoding.fit_transform(data['diagnosis'])
     return data
-
+def clean_misslabeled(data:pd.DataFrame)->pd.DataFrame():
+    """function to drop a row which target is wrongly labeled  """
+    data = data[(data['diagnosis'] == 'B') | (data['diagnosis'] == 'M')]
+    return data

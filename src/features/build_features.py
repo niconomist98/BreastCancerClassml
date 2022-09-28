@@ -6,6 +6,7 @@ from pathlib import Path
 from sklearn.preprocessing import StandardScaler
 from sklearn.model_selection import train_test_split # Import train_test_split function
 from sklearn.impute import KNNImputer
+from sklearn import preprocessing
 
 def main(input_filepath, output_filepath):
     """ Runs data feature engineering scripts to turn interim data from (../interim) into
@@ -151,8 +152,6 @@ def clean_blankspaces(data:pd.DataFrame,cols_to_clean:list)-> pd.DataFrame:
 def drop_exact_duplicates(data: pd.DataFrame) -> pd.DataFrame:
     """Drop duplicate rows from data."""
     return data.drop_duplicates(keep=False)
-
-
 
 
 
