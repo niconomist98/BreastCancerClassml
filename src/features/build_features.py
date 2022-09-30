@@ -49,6 +49,7 @@ def main(input_filepath, output_filepath):
                     .pipe(drop_cols,drop_cols=cols_to_drop)
                     .pipe(drop_exact_duplicates)
                     .pipe(print_shape, msg=' Shape after dropping unnecesary cols')
+                    .pipe(drop_hc_cols,msg='Dropping highly correlated features')
                     )
 
     x_train = process_data.drop("diagnosis", axis=1)
@@ -68,7 +69,14 @@ def main(input_filepath, output_filepath):
 
 
 
-
+def drop_hc_cols(data:pd.DataFrame,msg:str)-> pd.DataFrame:
+    """Function to drop higlhy correlated features of breast cancer dataset"""
+    data=data[['radius_worst', 'concavity_worst', 'fractal_dimension_worst',
+       'texture_worst', 'smoothness_worst', 'symmetry_worst', 'perimeter_se',
+       'smoothness_se', 'area_se', 'texture_se', 'fractal_dimension_se',
+       'symmetry_se', 'diagnosis', 'symmetry_mean']]
+    print(f'{msg}')
+    return data
 
 def imputer_KNN (X_train:pd.DataFrame)->pd.DataFrame:
     """Use knn to impute na values """
@@ -101,6 +109,8 @@ def to_category(data:pd.DataFrame)->pd.DataFrame:
     """Convert a colum to category"""
     data['diagnosis'].astype('category')
     return data
+
+
 
 
 # function to print shape of the dataframe
