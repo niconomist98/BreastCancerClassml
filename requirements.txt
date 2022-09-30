@@ -24,4 +24,4 @@ pyarrow
 seaborn
 parquet
 fastparquet
-
+pytest
