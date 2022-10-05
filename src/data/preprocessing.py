@@ -22,8 +22,6 @@ def process_data(data: pd.DataFrame) -> pd.DataFrame:
                     )
 
     return process_data
-# remove duplicates by patient_nbr in this step to avoid
-# same person in train and test
 
 # function to print shape of the dataframe
 def print_shape(data: pd.DataFrame, msg: str = 'Shape =') -> pd.DataFrame:
